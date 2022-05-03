@@ -1,15 +1,11 @@
 # Abstractive_Summarization
 
-# mT5、T5 簡介
-
 ## T5
-Text-to-text transfer Transformer
+T5是Text-To-Text Transfer Transformer的簡稱，資料先進行預訓練，在使用預訓練的模型參數對真正目標領域進行微調(fine-tuning)。T5適用在許多NLP相關的工作，像是翻譯、分類、回歸（例如，預測兩個句子的相似程度，相似度分數在 1 到 5 之間），其他sequence to sequence任務，如摘要、生成文章。
 
-使用預訓練的模型參數對真正目標領域進行微調(fine-tuning)
+T5 在預訓練過程中使用C4 (Colossal Clean Crawled Corpus)的資料，C4是透過將網頁文章爬取下來後，刪除重複數據、不完整的句子使資料庫足夠乾淨，預訓練時把C4資料集以corrupted spans方式進行
 
-使用預訓練資料Colossal Clean Crawled Corpus (C4)
-
-預訓練時把C4資料集以corrupted spans方式進行
+與GPT2不同的是，T5包含Encoder 和 Decoder，而GPT2只有Decoder。
 
 T5能做的事
 - 翻譯
@@ -98,7 +94,33 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     eval_loss| 3.2354 | 3.6509 | 3.7338
     eval_rouge1 | 13.7175 | 11.1772 | 8.0482
 
+## 變數解釋
+
+- DataTrainingArguments
+    - `text_column`:文章欄位名稱
+    - `summary_column`:摘要欄位名稱 (沒有設定，第一個會視為文章、第二個為摘要)
+    - `preprocessing_num_workers`: 加快資料預處理的速度
+    - `max_source_length`:文章採取長度（可以無限長）
+    - `max_target_length`:摘要採取長度
+    - `num_beams`:beams 搜尋法 （用在evaluate and predict）
+    - `source_prefix`:任務類別（用在t5訓練）
+
+- TrainingArguments
+    - `load_best_model_at_end`: 設定為true時，一定要設定`evaluation_strategy`
+    - `evaluation_strategy`:可以是steps、no、epoch，如果不是no，do_eval會自動為true
+    - `gradient_accumulation_steps`:累積梯度，「變相」擴大`batch size`。
+    - `fp16`:mt5 不能使用
+    
+- Predict時使用(transformers pipeline)
+    - `repetition_penalty`:疑似t5無法使用
+    - `no_repeat_ngram_size`:重複字詞限制
+    - `num_beams`:beams 搜尋法
 ## 注意事項
 1. 訓練基礎因使用超過3000筆資料，資料太少預測結果會出現 `<extra_id_0>`
 2. 使用mt5時，不能使用`fp16`，會造成訓練問題，導致預測結果不良
 3. 因為記憶體問題，`batch size`無法調太大，但在一定條件下，`batch size`越大，模型越穩定。此時可以調大`gradient_accumulation_steps`，來解決顯卡儲存空間的問題，如果`gradient_accumulation_steps`為8，則`batch size`「變相」擴大8倍。
+
+## 參考資料
+1. [T5參考影片 -> Colin Raffel](https://www.youtube.com/watch?v=eKqWC577WlI&list=UUEqgmyWChwvt6MFGGlmUQCQ&index=5)
+2. [淺談神經機器翻譯 & 用 Transformer 與 TensorFlow 2](https://leemeng.tw/neural-machine-translation-with-transformer-and-tensorflow2.html?fbclid=IwAR2eHxhPxyg96A3mbtveRHd5zFKscSLA-u8jdoDueUC9Dl1g3Vrv-61Y84g)
+
