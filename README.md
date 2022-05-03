@@ -38,6 +38,28 @@ mT5 在single-task fine-tuning 有無使用前綴差別不大。
 multi-task fine-tuning，你應該使用前綴。
 
 
+### 資料簡介
+
+- 台灣新聞資料
+
+資料 | title | content | summary(抽取式)
+------|:-----:|------:|------:
+min | 2 | 100| 8
+mean| 26 | 849 | 176
+median| 24 | 621 | 154
+max | 229 | 145770 | 11013
+std | 10.65 | 1216.55 | 212.39
+
+- 紐約時報中文網（簡中翻譯繁中）
+
+資料 | title | content | summary | predict
+------|:-----:|------:|------:|------:
+min | 2 | 1 | 14 | 26
+mean| 16 | 2351 |72 | 70
+median| 16 | 2199 |75 |  68
+max | 35 | 38882 | 156| 234
+std | 4 | 1561.49| 7.35 | 14.6
+
 ### 測試資料
 
 - 2萬筆資料
@@ -49,6 +71,8 @@ PREDICT MEM| 4.89 | 5.5 | 5.5
 訓練時間 | 2.6 hr | 3.8 hr | 3.7 hr
 train_samples_per_second | 4.942 | 3.494 | 3.489
 predict_samples_per_second | 6.243 | 5.126 | 5.079
+loss | 3.2005 | 2.2277 | 1.9857
+eval_loss | 2.9733 | 2.4192 | 2.4770
 eval_rouge1 | 15.1976 | 20.4043 | 19.472
 predict_rouge1 | 15.8083 | 20.5865 | 18.6896
 Model size | 1.1GB | 2.2GB | 2.2GB
@@ -60,6 +84,8 @@ Model size | 1.1GB | 2.2GB | 2.2GB
 訓練時間 | 15.5 hr | 19.3 hr | 18.9 hr
 train_samples_per_second | 2.067 | 1.668 | 1.706
 predict_samples_per_second | 5.625 | 4.747 | 4.803
+loss | 2.8489 | 2.0759 | 1.822
+eval_loss | 2.6341 | 2.1617 | 2.1492
 eval_rouge1 | 18.7681 | 23.9472 | 23.7812
 predict_rouge1 | 18.549 | 23.5467 | 23.2484
 Model size | 1.1GB | 2.2GB | 2.2GB
@@ -94,6 +120,7 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     eval_loss| 3.2354 | 3.6509 | 3.7338
     eval_rouge1 | 13.7175 | 11.1772 | 8.0482
 
+
 ## 變數解釋
 
 - DataTrainingArguments
@@ -118,9 +145,8 @@ Model size | 1.1GB | 2.2GB | 2.2GB
 ## 注意事項
 1. 訓練基礎因使用超過3000筆資料，資料太少預測結果會出現 `<extra_id_0>`
 2. 使用mt5時，不能使用`fp16`，會造成訓練問題，導致預測結果不良
-3. 因為記憶體問題，`batch size`無法調太大，但在一定條件下，`batch size`越大，模型越穩定。此時可以調大`gradient_accumulation_steps`，來解決顯卡儲存空間的問題，如果`gradient_accumulation_steps`為8，則`batch size`「變相」擴大8倍。
+3. 因為記憶體問題，`batch size`無法調太大，但在一定條件下，`batch size`越大，模型越穩定。此時可以調`gradient_accumulation_steps`，來解決顯卡儲存空間的問題，如果`gradient_accumulation_steps`為8，則`batch size`「變相」擴大8倍。
 
 ## 參考資料
 1. [T5參考影片 -> Colin Raffel](https://www.youtube.com/watch?v=eKqWC577WlI&list=UUEqgmyWChwvt6MFGGlmUQCQ&index=5)
 2. [淺談神經機器翻譯 & 用 Transformer 與 TensorFlow 2](https://leemeng.tw/neural-machine-translation-with-transformer-and-tensorflow2.html?fbclid=IwAR2eHxhPxyg96A3mbtveRHd5zFKscSLA-u8jdoDueUC9Dl1g3Vrv-61Y84g)
-
