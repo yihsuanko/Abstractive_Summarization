@@ -120,6 +120,16 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     eval_loss| 3.2354 | 3.6509 | 3.7338
     eval_rouge1 | 13.7175 | 11.1772 | 8.0482
 
+- 紐約時報資料(small vs base)
+    - 18000筆測資
+    - 訓練summary
+
+    模型 | small(1e-4) | base(1e-3)
+    ------|:-----:|------:
+    訓練時間 | 37 min | 88 min
+    loss| 2.7691 | 2.165
+    eval_loss| 2.7267 | 2.3809
+    eval_rouge1 | 7.3426 | 8.2238
 
 ## 變數解釋
 
