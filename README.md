@@ -106,16 +106,16 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     - data: 10萬筆
     - model: base
     - gradient_accumulation_steps: 8
-    - learning rate: 0.001
+    - learning rate: 0.0001
     
     target | title | summary(抽取式)
     ------|:-----:|------:
-    訓練時間 | 19.43 hr |
-    train_samples_per_second | 14.449 |
-    predict_samples_per_second | 6.728 |
-    loss | 0.3121 |
-    eval_loss | 1.5873 |
-    eval_rouge1 | 29.6875 |
+    訓練時間 | 19.53 hr |
+    train_samples_per_second | 14.381 |
+    predict_samples_per_second | 6.557 |
+    loss | 1.3335 |
+    eval_loss | 1.6193 |
+    eval_rouge1 | 29.0476 |
 
 
 - 比較 gradient_accumulation_steps (使用mt5-small)
