@@ -37,6 +37,13 @@ mT5 在mC4語料庫上進行了預訓練，涵蓋 101 種語言
 mT5 在single-task fine-tuning 有無使用前綴差別不大。
 multi-task fine-tuning，你應該使用前綴。
 
+### 資料清理流程
+1. 清理前綴字詞
+2. 清理英文、website、html tag
+3. 清理標題小於5個字、內容小於100字的文章
+4. 清理重複文章
+5. 清理空白、換行
+
 
 ### 資料簡介
 
@@ -78,6 +85,11 @@ predict_rouge1 | 15.8083 | 20.5865 | 18.6896
 Model size | 1.1GB | 2.2GB | 2.2GB
 
 - 5萬筆資料
+- 模型參數資料(0423_small/0423_base/0423_XLSum)
+    - data: 5萬筆
+    - evaluation_strategy："steps"
+    - learning_rate: 0.0001
+    - gradient_accumulation_steps: 1
 
 模型 | mt5-small | mt5-base | XLSum-base
 ------|:-----:|------:|------:
@@ -90,11 +102,21 @@ eval_rouge1 | 18.7681 | 23.9472 | 23.7812
 predict_rouge1 | 18.549 | 23.5467 | 23.2484
 Model size | 1.1GB | 2.2GB | 2.2GB
 
-- 模型參數資料(0423_small/0423_base/0423_XLSum)
-    - data: 5萬筆
-    - evaluation_strategy："steps"
-    - learning_rate: 0.0001
-    - gradient_accumulation_steps: 1
+- 比較長短target(使用標題和抽取是摘要)
+    - data: 10萬筆
+    - model: base
+    - gradient_accumulation_steps: 8
+    - learning rate: 0.001
+    
+    target | title | summary(抽取式)
+    ------|:-----:|------:
+    訓練時間 | 19.43 hr |
+    train_samples_per_second | 14.449 |
+    predict_samples_per_second | 6.728 |
+    loss | 0.3121 |
+    eval_loss | 1.5873 |
+    eval_rouge1 | 29.6875 |
+
 
 - 比較 gradient_accumulation_steps (使用mt5-small)
     - learning_rate: 0.0001
@@ -147,11 +169,61 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     - `evaluation_strategy`:可以是steps、no、epoch，如果不是no，do_eval會自動為true
     - `gradient_accumulation_steps`:累積梯度，「變相」擴大`batch size`。
     - `fp16`:mt5 不能使用
-    
+
+## generate text
+
 - Predict時使用(transformers pipeline)
+    ```python
+    from transformers import pipeline
+    import torch
+    torch.manual_seed(32)  # 固定random seed
+    summarizer = pipeline("summarization",model="./model")
+    summarizer(text,args*)
+
+    ```
+    - `max_length`: 生產最長字數限制
+    - `min_length`: 生產最短字數限制
     - `repetition_penalty`:疑似t5無法使用
     - `no_repeat_ngram_size`:重複字詞限制
     - `num_beams`:beams 搜尋法
+    - `early_stopping`: 當所有beams 找到 EOS token.
+    - `do_sample`: 隨機抽樣
+    - `top_k`: (defaults to 50) 抽樣限制，先透過機率排序，選出機率最大的K個字，再來分機率，最後抽樣
+    - `top_p`:(defaults to 1.0)抽樣限制，先透過機率排序，選出累績機率和等於P的字，再來分機率，最後抽樣
+
+- generate 演算法介紹
+    - Greedy search
+        - `do_sample = False`
+        - `num_beams = 1`
+        - 走機率最大的
+        - 最簡單的演算法，但生產出來的內容，受限於訓練資料。
+    - Random sampling
+        - `do_sample = True`
+        - `num_beams = 1`
+        - 依照字的機率，隨機抽一個
+        - 可以搭配`temperature`使用，`temperature` 會增加機率大的字的機率，減少機率小的字的機率. 
+        - `temperature = 1` -> Random sampling
+        - `0 < temperature < 1` -> 字的機率會做調整，越小效果越大
+        - `temperature -> 0` -> Greedy search
+        - 可以搭配`top_k`、`top_p`使用
+        - `top_p` 可以解決使用`top_k`每次都會有一定數量的候選字
+    - Beams search
+        - `do_sample = False`
+        - `num_beams > 1`
+        - 會保留前幾名，直到結束，可以用來產生多個結果。
+        - 適用在每次輸出長度都差不多的情況
+        - 嚴重受到重複生成的影響
+        - 隨機性不足，與人類日常不同
+
+    - Beams sampling
+        - `do_sample = True`
+        - `num_beams > 1`
+        - 將兩種方法結合使用
+        - mt5使用的過程中，如果有使用topk,temperature容易會有其他語言出現
+
+- 演算法測試
+
+
 ## 注意事項
 1. 訓練基礎因使用超過3000筆資料，資料太少預測結果會出現 `<extra_id_0>`
 2. 使用mt5時，不能使用`fp16`，會造成訓練問題，導致預測結果不良
@@ -160,3 +232,4 @@ Model size | 1.1GB | 2.2GB | 2.2GB
 ## 參考資料
 1. [T5參考影片 -> Colin Raffel](https://www.youtube.com/watch?v=eKqWC577WlI&list=UUEqgmyWChwvt6MFGGlmUQCQ&index=5)
 2. [淺談神經機器翻譯 & 用 Transformer 與 TensorFlow 2](https://leemeng.tw/neural-machine-translation-with-transformer-and-tensorflow2.html?fbclid=IwAR2eHxhPxyg96A3mbtveRHd5zFKscSLA-u8jdoDueUC9Dl1g3Vrv-61Y84g)
+3. [Decoding Strategies that You Need to Know for Response Generation](https://towardsdatascience.com/decoding-strategies-that-you-need-to-know-for-response-generation-ba95ee0faadc)
