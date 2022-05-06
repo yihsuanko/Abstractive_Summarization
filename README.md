@@ -43,6 +43,7 @@ multi-task fine-tuning，你應該使用前綴。
 3. 清理標題小於5個字、內容小於100字的文章
 4. 清理重複文章
 5. 清理空白、換行
+6. 中文字的比例>50%
 
 
 ### 資料簡介
@@ -102,6 +103,21 @@ eval_rouge1 | 18.7681 | 23.9472 | 23.7812
 predict_rouge1 | 18.549 | 23.5467 | 23.2484
 Model size | 1.1GB | 2.2GB | 2.2GB
 
+- 清完資料
+- 模型參數資料(0505_10/0505_)
+    - data: 6萬4千筆
+    - evaluation_strategy："epoch"
+    - learning_rate: 0.001
+    - lr_scheduler_type: constant
+    - gradient_accumulation_steps: 16
+
+    類別 | title | summary
+    ------|:-----:|------:
+    訓練時間 | 1.9 hr |  hr
+    loss | 2.6019 | 
+    eval_loss | 2.5358 | 
+    eval_rouge1 | 16.623 | 
+
 - 比較長短target(使用標題和抽取是摘要)
     - data: 10萬筆
     - model: base
@@ -110,12 +126,13 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     
     target | title | summary(抽取式)
     ------|:-----:|------:
-    訓練時間 | 19.53 hr |
-    train_samples_per_second | 14.381 |
-    predict_samples_per_second | 6.557 |
-    loss | 1.3335 |
-    eval_loss | 1.6193 |
-    eval_rouge1 | 29.0476 |
+    訓練時間 | 19.53 hr | 8.1625
+    epoch | 10 | 3
+    train_samples_per_second | 14.381 | 10.308
+    predict_samples_per_second | 6.557 | 1.307
+    loss | 1.3335 | 0.1525
+    eval_loss | 1.6193 | 0.1396
+    eval_rouge1 | 29.0476 | 63.7029
 
 
 - 比較 gradient_accumulation_steps (使用mt5-small)
@@ -141,6 +158,19 @@ Model size | 1.1GB | 2.2GB | 2.2GB
     loss| 3.4117 | 4.5563 |  5.2583
     eval_loss| 3.2354 | 3.6509 | 3.7338
     eval_rouge1 | 13.7175 | 11.1772 | 8.0482
+
+- 比較 learning rate (使用紐約時報資料)
+    - mt5-small
+    - gradient_accumulation_steps: 16
+    - 18000筆測資
+    - 訓練summary
+
+    learning rate | 1e-3 | 1e-3 (constant) | 1e-4 
+    ------|:-----:|------:|------:
+    訓練時間 | 56 min |  77 min | 37 min 
+    loss| 2.7852 | 2.7665 |  2.7691
+    eval_loss| 2.5925 | 2.6024 | 2.7267
+    eval_rouge1 | 7.4122 | 7.6442 | 7.3426
 
 - 紐約時報資料(small vs base)
     - 18000筆測資
@@ -222,7 +252,23 @@ Model size | 1.1GB | 2.2GB | 2.2GB
         - mt5使用的過程中，如果有使用topk,temperature容易會有其他語言出現
 
 - 演算法測試
+    - 紐約時報資料
+    - 預測500筆測資
 
+        演算法 | greedy | beams | sampling | beams sp
+        ------|:-----:|------:|------:|------:
+        eval_rouge1 |  | 
+        eval_rouge2 |  | 
+        eval_rougeL |  | 
+    
+    - beams
+
+        演算法 | n = 2 | n = 5 | n = 10 | n = 20
+        ------|:-----:|------:|------:|------:
+        time |  | 
+        eval_rouge1 |  | 
+        eval_rouge2 |  | 
+        eval_rougeL |  | 
 
 ## 注意事項
 1. 訓練基礎因使用超過3000筆資料，資料太少預測結果會出現 `<extra_id_0>`
@@ -233,3 +279,4 @@ Model size | 1.1GB | 2.2GB | 2.2GB
 1. [T5參考影片 -> Colin Raffel](https://www.youtube.com/watch?v=eKqWC577WlI&list=UUEqgmyWChwvt6MFGGlmUQCQ&index=5)
 2. [淺談神經機器翻譯 & 用 Transformer 與 TensorFlow 2](https://leemeng.tw/neural-machine-translation-with-transformer-and-tensorflow2.html?fbclid=IwAR2eHxhPxyg96A3mbtveRHd5zFKscSLA-u8jdoDueUC9Dl1g3Vrv-61Y84g)
 3. [Decoding Strategies that You Need to Know for Response Generation](https://towardsdatascience.com/decoding-strategies-that-you-need-to-know-for-response-generation-ba95ee0faadc)
+
