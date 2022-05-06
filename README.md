@@ -1,7 +1,5 @@
 # Abstractive_Summarization
 
-# mT5、T5 簡介
-
 ## T5
 T5是Text-To-Text Transfer Transformer的簡稱，資料先進行預訓練，在使用預訓練的模型參數對真正目標領域進行微調(fine-tuning)。T5適用在許多NLP相關的工作，像是翻譯、分類、回歸（例如，預測兩個句子的相似程度，相似度分數在 1 到 5 之間），其他sequence to sequence任務，如摘要、生成文章。
 
