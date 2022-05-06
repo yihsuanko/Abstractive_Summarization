@@ -1,5 +1,7 @@
 # Abstractive_Summarization
 
+# mT5、T5 簡介
+
 ## T5
 T5是Text-To-Text Transfer Transformer的簡稱，資料先進行預訓練，在使用預訓練的模型參數對真正目標領域進行微調(fine-tuning)。T5適用在許多NLP相關的工作，像是翻譯、分類、回歸（例如，預測兩個句子的相似程度，相似度分數在 1 到 5 之間），其他sequence to sequence任務，如摘要、生成文章。
 
@@ -49,14 +51,27 @@ multi-task fine-tuning，你應該使用前綴。
 ### 資料簡介
 
 - 台灣新聞資料
+    - 訓練標題資料集
+    - train: 64503筆資料
 
-資料 | title | content | summary(抽取式)
-------|:-----:|------:|------:
-min | 2 | 100| 8
-mean| 26 | 849 | 176
-median| 24 | 621 | 154
-max | 229 | 145770 | 11013
-std | 10.65 | 1216.55 | 212.39
+    資料 | title | content 
+    ------|:-----:|------:
+    min | 25 | 100
+    median| 24 | 624
+    max | 99 | 4997
+    mean| 25.19 | 806.4
+    std | 9.21 | 681.13
+
+    - 訓練摘要資料集
+    - train: 52815筆資料
+
+    資料 | abstract | content（挖掉過的） 
+    ------|:-----:|------:
+    min | 11 | 150
+    median| 159 | 548
+    max | 2601 | 4842
+    mean| 172.49 | 769.18
+    std | 72.02 | 674.66
 
 - 紐約時報中文網（簡中翻譯繁中）
 
@@ -280,3 +295,9 @@ Model size | 1.1GB | 2.2GB | 2.2GB
 2. [淺談神經機器翻譯 & 用 Transformer 與 TensorFlow 2](https://leemeng.tw/neural-machine-translation-with-transformer-and-tensorflow2.html?fbclid=IwAR2eHxhPxyg96A3mbtveRHd5zFKscSLA-u8jdoDueUC9Dl1g3Vrv-61Y84g)
 3. [Decoding Strategies that You Need to Know for Response Generation](https://towardsdatascience.com/decoding-strategies-that-you-need-to-know-for-response-generation-ba95ee0faadc)
 
+清10萬筆資料
+確認測試資料集有沒有出現在train
+跑 small 10萬筆清好的
+3 epoch
+lr 1e-3 constant
+gradient 16
